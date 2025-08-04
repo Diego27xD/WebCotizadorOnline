@@ -1,0 +1,448 @@
+<head>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <style>
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <%- include('partials/header') %>
+
+  <div class="container mt-4">
+    <h4 class="mb-3">Nueva Cotización</h4>
+
+    <form id="formCotizacion" class="needs-validation" novalidate>
+      <!-- Cliente -->
+
+      <!-- Cotización -->
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="IdCliente" class="form-label">Cliente</label>
+          <select class="form-select" id="IdCliente" name="IdCliente" required>
+            <option value="">Seleccione cliente</option>
+            <% listaClientes.forEach(c => { %>
+            <option value="<%= c.IdCliente %>">
+              <%= c.razonSocial %> - <%= c.documento %>
+            </option>
+            <% }) %>
+          </select>
+          <div class="invalid-feedback">Seleccione un cliente</div>
+          <!-- <button
+            type="button"
+            class="btn btn-link"
+            onclick="abrirModalCliente()"
+          >
+            + Crear cliente
+          </button> -->
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="TipoMoneda" class="form-label">Moneda</label>
+          <select
+            class="form-select"
+            id="TipoMoneda"
+            name="TipoMoneda"
+            required
+          >
+            <option value="">Seleccione</option>
+            <option value="Soles">Soles</option>
+            <option value="Dólares">Dólares</option>
+          </select>
+          <div class="invalid-feedback">Campo requerido</div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="FormaPago" class="form-label">Forma de Pago</label>
+          <select class="form-select" id="FormaPago" name="FormaPago" required>
+            <option value="">Seleccione</option>
+            <option value="Contado">Contado</option>
+            <option value="Crédito">Crédito</option>
+          </select>
+          <div class="invalid-feedback">Campo requerido</div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="validezOferta" class="form-label"
+            >Validez de Oferta (días)</label
+          >
+          <input
+            type="number"
+            class="form-control"
+            id="validezOferta"
+            name="validezOferta"
+            required
+          />
+          <div class="invalid-feedback">Campo requerido</div>
+        </div>
+      </div>
+
+      <!-- Servicios -->
+      <h5>Servicios</h5>
+      <div id="serviciosContainer"></div>
+      <button
+        type="button"
+        class="btn btn-outline-primary btn-sm mb-3"
+        onclick="agregarServicio('Servicio')"
+      >
+        + Agregar Servicio
+      </button>
+
+      <!-- Repuestos -->
+      <h5>Repuestos</h5>
+      <div id="repuestosContainer"></div>
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm mb-3"
+        onclick="agregarServicio('Repuesto')"
+      >
+        + Agregar Repuesto
+      </button>
+      <br />
+      <button type="submit" class="btn btn-success">Guardar Cotización</button>
+    </form>
+    <br />
+    <h4>Listado de Cotizaciones</h4>
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        id="filtroCotizaciones"
+        placeholder="Buscar por razón social o documento..."
+        onkeyup="filtrarCotizaciones()"
+      />
+    </div>
+    <table class="table table-bordered table-hover table-responsive">
+      <thead class="bg-primary text-white">
+        <tr class="bg-primary text-white">
+          <th class="bg-primary text-white">ID</th>
+          <th class="bg-primary text-white">PDF</th>
+          <th class="bg-primary text-white">Cliente</th>
+          <th class="bg-primary text-white">Documento</th>
+          <th class="bg-primary text-white">Subtotal</th>
+          <th class="bg-primary text-white">IGV</th>
+          <th class="bg-primary text-white">Total</th>
+          <th class="bg-primary text-white">Fecha</th>
+          <th style="text-align: center" class="bg-primary text-white">
+            Opciones
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tablaCotizaciones">
+        <% listaCotizacion.forEach(c => { %>
+        <tr>
+          <td><%= c.IdCotizacion %></td>
+          <td
+            style="
+              display: flex;
+              gap: 8px;
+              justify-content: center;
+              align-items: center;
+            "
+          >
+            <a
+              href="/cotizacion/download/<%= c.IdCotizacion %>"
+              class="btn btn-info text-white"
+              data-filename="cotizacion_<%= c.IdCotizacion %>.pdf"
+            >
+              PDF
+            </a>
+          </td>
+          <td><%= c.cliente.razonSocial %></td>
+          <td><%= c.cliente.documento %></td>
+          <td>S/. <%= c.subtotal %></td>
+          <td>S/. <%= c.igv %></td>
+          <td>S/. <%= c.montoTotal %></td>
+          <td><%= c.fechaCreacion.toLocaleDateString() %></td>
+          <td
+            style="
+              display: flex;
+              gap: 8px;
+              justify-content: center;
+              align-items: center;
+            "
+          >
+            <button
+              class="btn btn-primary"
+              onclick="verDetalle('<%= c.IdCotizacion %>')"
+            >
+              Ver
+            </button>
+
+            <button
+              class="btn btn-danger"
+              onclick="eliminarCotizacion('<%= c.IdCotizacion %>')"
+            >
+              Eliminar
+            </button>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <div id="loadingOverlay" style="display: none">
+    <div class="spinner-border text-light" role="status"></div>
+  </div>
+
+  <!-- Modal para crear cliente -->
+  <div class="modal fade" id="modalCliente" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" id="formClienteModal">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Cliente</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Campos del cliente (como en cliente.ejs) -->
+          <!-- ... -->
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div
+    id="detalleModal"
+    style="
+      display: none;
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      z-index: 1000;
+    "
+  >
+    <h3>Detalle de Cotización</h3>
+    <p><strong>Cliente:</strong> <span id="modalCliente"></span></p>
+    <p><strong>Forma de Pago:</strong> <span id="modalFormaPago"></span></p>
+    <p><strong>Validez:</strong> <span id="modalValidez"></span> días</p>
+    <p><strong>Servicios:</strong></p>
+    <ul id="modalServicios"></ul>
+    <p><strong>Subtotal:</strong> S/. <span id="modalSubtotal"></span></p>
+    <p><strong>IGV:</strong> S/. <span id="modalIGV"></span></p>
+    <p><strong>Total:</strong> S/. <span id="modalTotal"></span></p>
+    <button
+      class="btn btn-danger"
+      onclick="document.getElementById('detalleModal').style.display='none'"
+    >
+      Cerrar
+    </button>
+  </div>
+
+  <script>
+    async function verDetalle(id) {
+      try {
+        const res = await fetch(`/cotizacion/view/${id}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          alert("No se pudo cargar el detalle.");
+          return;
+        }
+
+        const c = data.cotizacion;
+        document.getElementById("modalCliente").textContent = c.cliente.nombre;
+        document.getElementById("modalFormaPago").textContent = c.FormaPago;
+        document.getElementById("modalValidez").textContent = c.validezOferta;
+        document.getElementById("modalSubtotal").textContent = c.subtotal;
+        document.getElementById("modalIGV").textContent = c.igv;
+        document.getElementById("modalTotal").textContent = c.montoTotal;
+
+        const serviciosList = document.getElementById("modalServicios");
+        serviciosList.innerHTML = "";
+        c.Servicios.forEach((s) => {
+          const li = document.createElement("li");
+          li.textContent = `${s.nombreServicio} - ${s.cantidad} × S/.${s.monto}`;
+          serviciosList.appendChild(li);
+        });
+
+        document.getElementById("detalleModal").style.display = "block";
+      } catch (err) {
+        console.error("Error al cargar detalle:", err);
+        alert("Error al consultar el servidor.");
+      }
+    }
+  </script>
+
+  <script>
+    const modalCliente = new bootstrap.Modal(
+      document.getElementById("modalCliente")
+    );
+
+    function abrirModalCliente() {
+      document.getElementById("formClienteModal").reset();
+      modalCliente.show();
+    }
+
+    let servicioIndex = 0; // 👈 Contador global único
+
+    function agregarServicio(tipo) {
+      const container =
+        tipo === "Servicio"
+          ? document.getElementById("serviciosContainer")
+          : document.getElementById("repuestosContainer");
+
+      const index = servicioIndex++; // 👈 Usamos un índice global único
+
+      const html = `
+    <div class="card mb-2 p-3">
+      <input type="hidden" name="servicios[${index}][TipoServicio]" value="${tipo}">
+      <div class="mb-2">
+        <label>Nombre</label>
+        <input type="text" class="form-control" name="servicios[${index}][nombreServicio]" required>
+      </div>
+      <div class="mb-2">
+        <label>Cantidad</label>
+        <input type="number" class="form-control" name="servicios[${index}][cantidad]" required>
+      </div>
+      <div class="mb-2">
+        <label>Monto</label>
+        <input type="number" class="form-control" name="servicios[${index}][monto]" required>
+      </div>
+      ${
+        tipo === "Repuesto"
+          ? `
+        <div class="mb-2">
+          <label>Nro Parte</label>
+          <input type="text" class="form-control" name="servicios[${index}][NroParte]">
+        </div>
+      `
+          : ""
+      }
+      <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">Eliminar</button>
+    </div>
+  `;
+
+      container.insertAdjacentHTML("beforeend", html);
+    }
+    document
+      .getElementById("formCotizacion")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        if (!form.checkValidity()) return form.classList.add("was-validated");
+
+        const data = Object.fromEntries(new FormData(form));
+
+        const servicios = Array.from(
+          form.querySelectorAll('[name^="servicios"]')
+        ).reduce((acc, input) => {
+          const match = input.name.match(/servicios\[(\d+)\]\[(\w+)\]/);
+          if (match) {
+            const [_, index, key] = match;
+            acc[index] = acc[index] || {};
+            acc[index][key] = input.value;
+          }
+          return acc;
+        }, []);
+
+        console.log(servicios);
+
+        await fetch("/cotizacion/crear", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...data,
+            servicios: Object.values(servicios), // Se envían todos los servicios y repuestos
+          }),
+        });
+
+        location.reload();
+      });
+
+    async function eliminarCotizacion(id) {
+      if (!confirm("¿Estas seguro de eliminar cotización?")) return;
+      await fetch(`/cotizacion/eliminar/${id}`, { method: "DELETE" });
+      location.reload();
+    }
+  </script>
+
+  <script>
+    function filtrarCotizaciones() {
+      const input = document
+        .getElementById("filtroCotizaciones")
+        .value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaCotizaciones tr");
+
+      filas.forEach((fila) => {
+        const razonSocial = fila.children[1].textContent.toLowerCase();
+        const documento = fila.children[2].textContent.toLowerCase();
+
+        if (razonSocial.includes(input) || documento.includes(input)) {
+          fila.style.display = "";
+        } else {
+          fila.style.display = "none";
+        }
+      });
+    }
+  </script>
+  <script>
+    document.querySelectorAll("a.btn-info").forEach((link) => {
+      link.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const overlay = document.getElementById("loadingOverlay");
+        overlay.style.display = "flex";
+
+        try {
+          const response = await fetch(link.href);
+          if (!response.ok) throw new Error("Error en la descarga");
+
+          // Leer el nombre desde el header 'Content-Disposition'
+          const disposition = response.headers.get("Content-Disposition");
+          let filename = "archivo.pdf";
+          if (disposition && disposition.includes("filename=")) {
+            filename = disposition
+              .split("filename=")[1]
+              .replaceAll('"', "")
+              .trim();
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          window.URL.revokeObjectURL(url);
+        } catch (err) {
+          alert("Error al descargar el archivo.");
+          console.error(err);
+        } finally {
+          overlay.style.display = "none";
+        }
+      });
+    });
+  </script>
+
+  <%- include('partials/footer') %>
+</body>

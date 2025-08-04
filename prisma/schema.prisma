@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model TipoDocumento {
+  IdTipoDocumento    Int       @id @default(autoincrement())
+  nombre             String
+  Cliente            Cliente[]
+  fechaCreacion      DateTime  @default(now())
+  fechaActualizacion DateTime  @default(now())
+}
+
+model Cliente {
+  IdCliente          Int           @id @default(autoincrement())
+  IdTipoDocumento    Int
+  TipoDocumento      TipoDocumento @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento])
+  razonSocial        String
+  documento          String
+  direccion          String?
+  telefono           String?
+  correoElectronico  String?
+  cotizaciones       Cotizacion[]
+  fechaCreacion      DateTime      @default(now())
+  fechaActualizacion DateTime      @default(now())
+}
+
+model Servicios {
+  IdServicio         Int        @id @default(autoincrement())
+  TipoServicio       String?
+  nombreServicio     String
+  cantidad           Int
+  monto              Int
+  NroParte           String?
+  IdCotizacion       Int
+  cotizacion         Cotizacion @relation(fields: [IdCotizacion], references: [IdCotizacion])
+  fechaCreacion      DateTime   @default(now())
+  fechaActualizacion DateTime   @default(now())
+}
+
+model Cotizacion {
+  IdCotizacion       Int         @id @default(autoincrement())
+  IdCliente          Int
+  cliente            Cliente     @relation(fields: [IdCliente], references: [IdCliente])
+  TipoMoneda         String
+  FormaPago          String
+  validezOferta      Int
+  igv                Int?
+  subtotal           Int?
+  montoTotal         Int?
+  Servicios          Servicios[]
+  fechaCreacion      DateTime    @default(now())
+  fechaActualizacion DateTime    @default(now())
+}
+
+model Usuario {
+  IdUsuario          Int      @id @default(autoincrement())
+  usuario            String
+  password           String
+  fechaCreacion      DateTime @default(now())
+  fechaActualizacion DateTime @default(now())
+}

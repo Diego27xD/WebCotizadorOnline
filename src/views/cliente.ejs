@@ -1,0 +1,307 @@
+<head>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <%- include('partials/header') %>
+
+  <div class="container mt-4">
+    <h4 class="mb-3">Gestión de Clientes</h4>
+    <div class="row align-items-center mb-3">
+      <div class="col-md-6">
+        <button class="btn btn-primary" onclick="abrirModal()">
+          Nuevo Cliente
+        </button>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <input
+          type="text"
+          class="form-control"
+          id="filtroClientes"
+          placeholder="Buscar por razón social o documento..."
+          onkeyup="filtrarClientes()"
+        />
+      </div>
+    </div>
+
+    <table class="table table-bordered table-hover table-responsive">
+      <thead>
+        <tr>
+          <th class="bg-primary text-white">Razón Social</th>
+          <th class="bg-primary text-white">Tipo Documento</th>
+          <th class="bg-primary text-white">Documento</th>
+          <th class="bg-primary text-white">Dirección</th>
+          <th class="bg-primary text-white">Teléfono</th>
+          <th class="bg-primary text-white">Correo Electrónico</th>
+          <th class="bg-primary text-white" style="text-align: center">
+            Acciones
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tablaClientes">
+        <% listaClientes.forEach(cliente => { %>
+        <tr>
+          <td><%= cliente.razonSocial %></td>
+          <td><%= cliente.TipoDocumento?.nombre %></td>
+          <td><%= cliente.documento %></td>
+          <td><%= cliente.direccion || '-' %></td>
+          <td><%= cliente.telefono || '-' %></td>
+          <td><%= cliente.correoElectronico || '-' %></td>
+          <td
+            style="
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 6px;
+              flex-direction: row;
+              width: 100%;
+            "
+          >
+            <button
+              class="btn btn-sm btn-warning"
+              data-cliente="<%- encodeURIComponent(JSON.stringify(cliente)) %>"
+              onclick="abrirDesdeData(this)"
+            >
+              Editar
+            </button>
+            <button
+              class="btn btn-sm btn-danger ml-2"
+              onclick="eliminarCliente('<%= cliente.IdCliente %>')"
+            >
+              Eliminar
+            </button>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="clienteModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content needs-validation" id="formCliente" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Nuevo Cliente</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="IdCliente" id="IdCliente" />
+
+          <div class="mb-3">
+            <label for="IdTipoDocumento" class="form-label"
+              >Tipo Documento</label
+            >
+            <select
+              class="form-select"
+              name="IdTipoDocumento"
+              id="IdTipoDocumento"
+              required
+            >
+              <option value="">Seleccione</option>
+              <option value="1">DNI</option>
+              <option value="2">RUC</option>
+            </select>
+            <div class="invalid-feedback">Tipo de documento requerido</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="documento" class="form-label">Documento</label>
+            <input
+              type="text"
+              class="form-control"
+              name="documento"
+              id="documento"
+              required
+            />
+            <div class="invalid-feedback" id="docFeedback">
+              Documento inválido
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="razonSocial" class="form-label">Razón Social</label>
+            <input
+              type="text"
+              class="form-control"
+              name="razonSocial"
+              id="razonSocial"
+              required
+            />
+            <div class="invalid-feedback">Razón social requerida</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="direccion" class="form-label">Dirección</label>
+            <input
+              type="text"
+              class="form-control"
+              name="direccion"
+              id="direccion"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input
+              type="text"
+              class="form-control"
+              name="telefono"
+              id="telefono"
+            />
+            <div class="invalid-feedback">
+              Teléfono debe tener 7 o 9 dígitos
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="correoElectronico" class="form-label"
+              >Correo Electrónico</label
+            >
+            <input
+              type="email"
+              class="form-control"
+              name="correoElectronico"
+              id="correoElectronico"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    function filtrarClientes() {
+      const input = document
+        .getElementById("filtroClientes")
+        .value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaClientes tr");
+
+      filas.forEach((fila) => {
+        const razonSocial = fila.children[0].textContent.toLowerCase();
+        const documento = fila.children[2].textContent.toLowerCase();
+
+        if (razonSocial.includes(input) || documento.includes(input)) {
+          fila.style.display = "";
+        } else {
+          fila.style.display = "none";
+        }
+      });
+    }
+  </script>
+
+  <script>
+    const modal = new bootstrap.Modal(document.getElementById("clienteModal"));
+    function abrirDesdeData(btn) {
+      const raw = btn.getAttribute("data-cliente");
+      const cliente = JSON.parse(decodeURIComponent(raw));
+      abrirModal(cliente);
+    }
+
+    function abrirModal(cliente = null) {
+      const form = document.getElementById("formCliente");
+      form.reset();
+      form.classList.remove("was-validated");
+      document.getElementById("docFeedback").textContent = "Documento inválido";
+
+      // Cargar datos si hay cliente
+      document.getElementById("IdCliente").value = cliente?.IdCliente || "";
+      document.getElementById("IdTipoDocumento").value =
+        cliente?.IdTipoDocumento || "";
+      document.getElementById("documento").value = cliente?.documento || "";
+      document.getElementById("razonSocial").value = cliente?.razonSocial || "";
+      document.getElementById("direccion").value = cliente?.direccion || "";
+      document.getElementById("telefono").value = cliente?.telefono || "";
+      document.getElementById("correoElectronico").value =
+        cliente?.correoElectronico || "";
+      document.getElementById("modalTitle").textContent = cliente
+        ? "Editar Cliente"
+        : "Nuevo Cliente";
+      modal.show();
+    }
+
+    document
+      .getElementById("formCliente")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        form.classList.add("was-validated");
+
+        const tipo = form.IdTipoDocumento.value;
+        const doc = form.documento.value.trim();
+        const razon = form.razonSocial.value.trim();
+        const tel = form.telefono.value.trim();
+
+        let valid = true;
+
+        // Validaciones requeridas
+        if (!tipo || !razon || !doc) valid = false;
+
+        // Documento según tipo
+        if (
+          (tipo == 1 && doc.length !== 8) ||
+          (tipo == 2 && doc.length !== 11)
+        ) {
+          form.documento.setCustomValidity("Documento inválido");
+          valid = false;
+        } else {
+          form.documento.setCustomValidity("");
+        }
+
+        // Teléfono: opcional pero si se ingresa debe tener 7 o 9 dígitos
+        if (tel && ![7, 9].includes(tel.length)) {
+          form.telefono.setCustomValidity("Teléfono inválido");
+          valid = false;
+        } else {
+          form.telefono.setCustomValidity("");
+        }
+
+        if (!valid) return;
+
+        const data = Object.fromEntries(new FormData(form));
+        const url = data.IdCliente ? "/cliente/actualizar" : "/cliente/crear";
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok && result.error === "Documento duplicado") {
+          form.documento.setCustomValidity("Documento ya registrado");
+          document.getElementById("docFeedback").textContent =
+            "Documento ya registrado";
+          form.classList.add("was-validated");
+          return;
+        }
+
+        location.reload();
+      });
+
+    async function eliminarCliente(id) {
+      if (!confirm("¿Eliminar cliente?")) return;
+      await fetch(`/cliente/eliminar/${id}`, { method: "DELETE" });
+      location.reload();
+    }
+  </script>
+</body>
