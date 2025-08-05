@@ -1,5 +1,6 @@
 <head>
   <!-- Bootstrap CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
@@ -125,74 +126,76 @@
         onkeyup="filtrarCotizaciones()"
       />
     </div>
-    <table class="table table-bordered table-hover table-responsive">
-      <thead class="bg-primary text-white">
-        <tr class="bg-primary text-white">
-          <th class="bg-primary text-white">ID</th>
-          <th class="bg-primary text-white">PDF</th>
-          <th class="bg-primary text-white">Cliente</th>
-          <th class="bg-primary text-white">Documento</th>
-          <th class="bg-primary text-white">Subtotal</th>
-          <th class="bg-primary text-white">IGV</th>
-          <th class="bg-primary text-white">Total</th>
-          <th class="bg-primary text-white">Fecha</th>
-          <th style="text-align: center" class="bg-primary text-white">
-            Opciones
-          </th>
-        </tr>
-      </thead>
-      <tbody id="tablaCotizaciones">
-        <% listaCotizacion.forEach(c => { %>
-        <tr>
-          <td><%= c.IdCotizacion %></td>
-          <td
-            style="
-              display: flex;
-              gap: 8px;
-              justify-content: center;
-              align-items: center;
-            "
-          >
-            <a
-              href="/cotizacion/download/<%= c.IdCotizacion %>"
-              class="btn btn-info text-white"
-              data-filename="cotizacion_<%= c.IdCotizacion %>.pdf"
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead class="bg-primary text-white">
+          <tr class="bg-primary text-white">
+            <th class="bg-primary text-white">ID</th>
+            <th class="bg-primary text-white">PDF</th>
+            <th class="bg-primary text-white">Cliente</th>
+            <th class="bg-primary text-white">Documento</th>
+            <th class="bg-primary text-white">Subtotal</th>
+            <th class="bg-primary text-white">IGV</th>
+            <th class="bg-primary text-white">Total</th>
+            <th class="bg-primary text-white">Fecha</th>
+            <th style="text-align: center" class="bg-primary text-white">
+              Opciones
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tablaCotizaciones">
+          <% listaCotizacion.forEach(c => { %>
+          <tr>
+            <td><%= c.IdCotizacion %></td>
+            <td
+              style="
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+                align-items: center;
+              "
             >
-              PDF
-            </a>
-          </td>
-          <td><%= c.cliente.razonSocial %></td>
-          <td><%= c.cliente.documento %></td>
-          <td>S/. <%= c.subtotal %></td>
-          <td>S/. <%= c.igv %></td>
-          <td>S/. <%= c.montoTotal %></td>
-          <td><%= c.fechaCreacion.toLocaleDateString() %></td>
-          <td
-            style="
-              display: flex;
-              gap: 8px;
-              justify-content: center;
-              align-items: center;
-            "
-          >
-            <button
-              class="btn btn-primary"
-              onclick="verDetalle('<%= c.IdCotizacion %>')"
+              <a
+                href="/cotizacion/download/<%= c.IdCotizacion %>"
+                class="btn btn-info text-white"
+                data-filename="cotizacion_<%= c.IdCotizacion %>.pdf"
+              >
+                PDF
+              </a>
+            </td>
+            <td><%= c.cliente.razonSocial %></td>
+            <td><%= c.cliente.documento %></td>
+            <td>S/. <%= c.subtotal %></td>
+            <td>S/. <%= c.igv %></td>
+            <td>S/. <%= c.montoTotal %></td>
+            <td><%= c.fechaCreacion.toLocaleDateString() %></td>
+            <td
+              style="
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+                align-items: center;
+              "
             >
-              Ver
-            </button>
+              <button
+                class="btn btn-primary"
+                onclick="verDetalle('<%= c.IdCotizacion %>')"
+              >
+                Ver
+              </button>
 
-            <button
-              class="btn btn-danger"
-              onclick="eliminarCotizacion('<%= c.IdCotizacion %>')"
-            >
-              Eliminar
-            </button>
-          </td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
+              <button
+                class="btn btn-danger"
+                onclick="eliminarCotizacion('<%= c.IdCotizacion %>')"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </div>
   <div id="loadingOverlay" style="display: none">
     <div class="spinner-border text-light" role="status"></div>
