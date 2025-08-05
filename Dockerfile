@@ -9,6 +9,7 @@ COPY . .
 RUN npm install
 
 
+RUN mkdir -p ./output-docx ./output-pdf
 
 # Instalar LibreOffice y Java compatible (default-jre en lugar de openjdk-11-jre)
 RUN apk update && \
