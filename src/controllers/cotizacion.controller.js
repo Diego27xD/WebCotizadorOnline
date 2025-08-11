@@ -22,7 +22,11 @@ const getCotizaciones = async (req, res) => {
       },
     });
 
-    const clientes = await prisma.cliente.findMany();
+    const clientes = await prisma.cliente.findMany({
+      orderBy: {
+        fechaCreacion: "desc",
+      },
+    });
     res.render("cotizacion", {
       listaCotizacion: result,
       listaClientes: clientes,
