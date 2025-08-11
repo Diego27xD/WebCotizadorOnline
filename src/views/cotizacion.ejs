@@ -88,6 +88,15 @@
           />
           <div class="invalid-feedback">Campo requerido</div>
         </div>
+        <div class="col-md-3 mb-3" id="plazoOferta">
+          <label for="plazoOferta" class="form-label">Plazo</label>
+          <input
+            type="number"
+            class="form-control"
+            id="plazoOferta"
+            name="plazoOferta"
+          />
+        </div>
       </div>
 
       <!-- Servicios -->
@@ -152,9 +161,7 @@
             <td><%= c.cliente.razonSocial %></td>
             <td><%= c.cliente.documento %></td>
             <td style="text-align: end">S/. <%= c.montoTotal.toFixed(2) %></td>
-            <td style="text-align: center">
-              <%= c.fechaCreacion.toLocaleDateString() %>
-            </td>
+            <td style="text-align: center"><%= c.fechaCreacion %></td>
             <td style="text-align: center">
               <a
                 href="/cotizacion/download/<%= c.IdCotizacion %>"

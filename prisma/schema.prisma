@@ -59,6 +59,7 @@ model Cotizacion {
   igv                Int?
   subtotal           Int?
   montoTotal         Int?
+  plazoOferta        Int?
   Servicios          Servicios[]
   fechaCreacion      DateTime    @default(now())
   fechaActualizacion DateTime    @default(now())

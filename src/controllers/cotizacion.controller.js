@@ -22,13 +22,20 @@ const getCotizaciones = async (req, res) => {
       },
     });
 
+    const resultValid = result.map((item) => {
+      return {
+        ...item,
+        fechaCreacion: format(new Date(item.fechaCreacion), "dd/MM/yyyy"),
+      };
+    });
+
     const clientes = await prisma.cliente.findMany({
       orderBy: {
         fechaCreacion: "desc",
       },
     });
     res.render("cotizacion", {
-      listaCotizacion: result,
+      listaCotizacion: resultValid,
       listaClientes: clientes,
     });
   } catch (error) {
@@ -45,6 +52,7 @@ const crearCotizaciones = async (req, res) => {
       TipoMoneda,
       FormaPago,
       validezOferta,
+      plazoOferta,
       servicios = [],
     } = req.body;
 
@@ -67,6 +75,7 @@ const crearCotizaciones = async (req, res) => {
           ? 0
           : parseInt(validezOferta),
         subtotal,
+        plazoOferta: parseInt(plazoOferta) || 0,
         igv,
         montoTotal,
         Servicios: {
@@ -120,7 +129,6 @@ const verDetalleCotizacion = async (req, res) => {
       },
     });
 
-    console.log(cotizacion);
     if (!cotizacion) {
       return res
         .status(404)
@@ -171,11 +179,11 @@ const downloadPDFCotizacion = async (req, res) => {
       documento: result.cliente.documento,
       pago: result.FormaPago,
       direccion: result.cliente.direccion || "Sin dirección",
-      plazo: result.validezOferta,
+      plazo: result.plazoOferta == 0 ? "---" : result.plazoOferta,
       telefono: result.cliente.telefono || "",
       moneda: result.TipoMoneda,
       correo: result.cliente.correoElectronico || "",
-      oferta: result.validezOferta,
+      oferta: result.validezOferta == 0 ? "---" : result.validezOferta,
       fecha: format(new Date(result.fechaCreacion), "dd-MM-yyyy"),
       subtotal: result.subtotal.toFixed(2),
       igv: result.igv.toFixed(2),
