@@ -44,8 +44,6 @@ const crearCotizaciones = async (req, res) => {
       servicios = [],
     } = req.body;
 
-    console.log(servicios);
-
     // Calcular subtotal
     const subtotal = servicios.reduce((acc, s) => {
       const cantidad = parseInt(s.cantidad) || 0;
@@ -61,7 +59,9 @@ const crearCotizaciones = async (req, res) => {
         IdCliente: parseInt(IdCliente),
         TipoMoneda,
         FormaPago,
-        validezOferta: parseInt(validezOferta),
+        validezOferta: isNaN(parseInt(validezOferta))
+          ? 0
+          : parseInt(validezOferta),
         subtotal,
         igv,
         montoTotal,
@@ -144,9 +144,11 @@ const downloadPDFCotizacion = async (req, res) => {
 
     const listServicios = result.Servicios.map((s, index) => ({
       ...s,
-      total: s.cantidad * s.monto,
-      item: index + 1,
-      NroParte: s.NroParte || 0,
+      total: (s.cantidad * s.monto).toFixed(2),
+      item: String(index + 1).padStart(2, "0"),
+      NroParte: s.NroParte || "---",
+      monto: s.monto.toFixed(2),
+      nombreServicio: s.nombreServicio.toUpperCase() || "Sin nombre",
     }));
 
     const templatePath = path.join(

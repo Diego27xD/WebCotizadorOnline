@@ -5,6 +5,10 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
   />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
   <style>
     @media (max-width: 768px) {
       .container {
@@ -103,7 +107,7 @@
             <th class="bg-primary text-white">Teléfono</th>
             <th class="bg-primary text-white">Correo Electrónico</th>
             <th class="bg-primary text-white" style="text-align: center">
-              Acciones
+              Opciones
             </th>
           </tr>
         </thead>
@@ -119,25 +123,23 @@
             <td
               style="
                 display: flex;
+                gap: 8px;
                 justify-content: center;
                 align-items: center;
-                gap: 6px;
-                flex-direction: row;
-                width: 100%;
               "
             >
               <button
-                class="btn btn-sm btn-warning"
+                class="btn btn-warning"
                 data-cliente="<%- encodeURIComponent(JSON.stringify(cliente)) %>"
                 onclick="abrirDesdeData(this)"
               >
-                Editar
+                <i class="bi bi-pencil-square"></i>
               </button>
               <button
-                class="btn btn-sm btn-danger ml-2"
+                class="btn btn-danger"
                 onclick="eliminarCliente('<%= cliente.IdCliente %>')"
               >
-                Eliminar
+                <i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>

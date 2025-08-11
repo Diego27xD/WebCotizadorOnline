@@ -21,6 +21,10 @@
       align-items: center;
     }
   </style>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -45,13 +49,9 @@
             <% }) %>
           </select>
           <div class="invalid-feedback">Seleccione un cliente</div>
-          <!-- <button
-            type="button"
-            class="btn btn-link"
-            onclick="abrirModalCliente()"
-          >
+          <button type="button" class="btn btn-link" onclick="abrirModal()">
             + Crear cliente
-          </button> -->
+          </button>
         </div>
         <div class="col-md-3 mb-3">
           <label for="TipoMoneda" class="form-label">Moneda</label>
@@ -76,7 +76,7 @@
           </select>
           <div class="invalid-feedback">Campo requerido</div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-3 mb-3" id="validezContainer" style="display: none">
           <label for="validezOferta" class="form-label"
             >Validez de Oferta (días)</label
           >
@@ -85,7 +85,6 @@
             class="form-control"
             id="validezOferta"
             name="validezOferta"
-            required
           />
           <div class="invalid-feedback">Campo requerido</div>
         </div>
@@ -130,45 +129,41 @@
       <table class="table table-bordered table-hover">
         <thead class="bg-primary text-white">
           <tr class="bg-primary text-white">
-            <th class="bg-primary text-white">ID</th>
-            <th class="bg-primary text-white">PDF</th>
-            <th class="bg-primary text-white">Cliente</th>
+            <th class="bg-primary text-white">Nro</th>
+            <th style="display: none">ID</th>
+            <th class="bg-primary text-white">Razón social</th>
+            <th class="bg-primary text-white">RUC / DNI</th>
+            <th class="bg-primary text-white" style="text-align: center">
+              Total
+            </th>
+            <th class="bg-primary text-white">Fecha de creación</th>
             <th class="bg-primary text-white">Documento</th>
-            <th class="bg-primary text-white">Subtotal</th>
-            <th class="bg-primary text-white">IGV</th>
-            <th class="bg-primary text-white">Total</th>
-            <th class="bg-primary text-white">Fecha</th>
             <th style="text-align: center" class="bg-primary text-white">
               Opciones
             </th>
           </tr>
         </thead>
         <tbody id="tablaCotizaciones">
-          <% listaCotizacion.forEach(c => { %>
+          <% listaCotizacion.forEach((c, i) => { %>
           <tr>
-            <td><%= c.IdCotizacion %></td>
-            <td
-              style="
-                display: flex;
-                gap: 8px;
-                justify-content: center;
-                align-items: center;
-              "
-            >
+            <td><%= listaCotizacion.length - i %></td>
+            <td style="display: none"><%= c.IdCotizacion %></td>
+
+            <td><%= c.cliente.razonSocial %></td>
+            <td><%= c.cliente.documento %></td>
+            <td style="text-align: end">S/. <%= c.montoTotal.toFixed(2) %></td>
+            <td style="text-align: center">
+              <%= c.fechaCreacion.toLocaleDateString() %>
+            </td>
+            <td style="text-align: center">
               <a
                 href="/cotizacion/download/<%= c.IdCotizacion %>"
                 class="btn btn-info text-white"
                 data-filename="cotizacion_<%= c.IdCotizacion %>.pdf"
               >
-                PDF
+                <i class="bi bi-file-earmark-pdf"></i>
               </a>
             </td>
-            <td><%= c.cliente.razonSocial %></td>
-            <td><%= c.cliente.documento %></td>
-            <td>S/. <%= c.subtotal %></td>
-            <td>S/. <%= c.igv %></td>
-            <td>S/. <%= c.montoTotal %></td>
-            <td><%= c.fechaCreacion.toLocaleDateString() %></td>
             <td
               style="
                 display: flex;
@@ -181,14 +176,14 @@
                 class="btn btn-primary"
                 onclick="verDetalle('<%= c.IdCotizacion %>')"
               >
-                Ver
+                <i class="bi bi-eye"></i>
               </button>
 
               <button
                 class="btn btn-danger"
                 onclick="eliminarCotizacion('<%= c.IdCotizacion %>')"
               >
-                Eliminar
+                <i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>
@@ -219,6 +214,111 @@
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal fade" id="clienteModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content needs-validation" id="formCliente" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Nuevo Cliente</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="IdCliente" id="IdCliente" />
+
+          <div class="mb-3">
+            <label for="IdTipoDocumento" class="form-label"
+              >Tipo Documento</label
+            >
+            <select
+              class="form-select"
+              name="IdTipoDocumento"
+              id="IdTipoDocumento"
+              required
+            >
+              <option value="">Seleccione</option>
+              <option value="1">DNI</option>
+              <option value="2">RUC</option>
+            </select>
+            <div class="invalid-feedback">Tipo de documento requerido</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="documento" class="form-label">Documento</label>
+            <input
+              type="text"
+              class="form-control"
+              name="documento"
+              id="documento"
+              required
+            />
+            <div class="invalid-feedback" id="docFeedback">
+              Documento inválido
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="razonSocial" class="form-label">Razón Social</label>
+            <input
+              type="text"
+              class="form-control"
+              name="razonSocial"
+              id="razonSocial"
+              required
+            />
+            <div class="invalid-feedback">Razón social requerida</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="direccion" class="form-label">Dirección</label>
+            <input
+              type="text"
+              class="form-control"
+              name="direccion"
+              id="direccion"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input
+              type="text"
+              class="form-control"
+              name="telefono"
+              id="telefono"
+            />
+            <div class="invalid-feedback">
+              Teléfono debe tener 7 o 9 dígitos
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="correoElectronico" class="form-label"
+              >Correo Electrónico</label
+            >
+            <input
+              type="email"
+              class="form-control"
+              name="correoElectronico"
+              id="correoElectronico"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
         </div>
       </form>
     </div>
@@ -254,6 +354,23 @@
       Cerrar
     </button>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const formaPago = document.getElementById("FormaPago");
+      const validezContainer = document.getElementById("validezContainer");
+      const validezInput = document.getElementById("validezOferta");
+
+      formaPago.addEventListener("change", function () {
+        if (this.value === "Crédito") {
+          validezContainer.style.display = "block";
+        } else {
+          validezContainer.style.display = "none";
+          validezInput.value = ""; // Limpia el valor si se oculta
+        }
+      });
+    });
+  </script>
 
   <script>
     async function verDetalle(id) {
@@ -311,33 +428,36 @@
       const index = servicioIndex++; // 👈 Usamos un índice global único
 
       const html = `
-    <div class="card mb-2 p-3">
-      <input type="hidden" name="servicios[${index}][TipoServicio]" value="${tipo}">
-      <div class="mb-2">
-        <label>Nombre</label>
-        <input type="text" class="form-control" name="servicios[${index}][nombreServicio]" required>
-      </div>
-      <div class="mb-2">
-        <label>Cantidad</label>
-        <input type="number" class="form-control" name="servicios[${index}][cantidad]" required>
-      </div>
-      <div class="mb-2">
-        <label>Monto</label>
-        <input type="number" class="form-control" name="servicios[${index}][monto]" required>
-      </div>
-      ${
-        tipo === "Repuesto"
-          ? `
-        <div class="mb-2">
-          <label>Nro Parte</label>
-          <input type="text" class="form-control" name="servicios[${index}][NroParte]">
-        </div>
-      `
-          : ""
-      }
-      <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">Eliminar</button>
-    </div>
-  `;
+            <div class="card mb-2 p-3">
+              <input type="hidden" name="servicios[${index}][TipoServicio]" value="${tipo}">
+              
+              ${
+                tipo === "Repuesto"
+                  ? `
+                <div class="mb-2">
+                  <label>Nro. Parte</label>
+                  <input type="text" class="form-control" name="servicios[${index}][NroParte]">
+                </div>
+              `
+                  : ""
+              }
+
+              <div class="mb-2">
+                <label>Nombre</label>
+                <input type="text" class="form-control" name="servicios[${index}][nombreServicio]" required>
+              </div>
+              <div class="mb-2">
+                <label>Cantidad</label>
+                <input type="number" class="form-control" name="servicios[${index}][cantidad]" required>
+              </div>
+              <div class="mb-2">
+                <label>Monto</label>
+                <input type="number" class="form-control" name="servicios[${index}][monto]" required step="any">
+              </div>
+              
+              <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">Eliminar</button>
+            </div>
+          `;
 
       container.insertAdjacentHTML("beforeend", html);
     }
@@ -445,6 +565,90 @@
         }
       });
     });
+  </script>
+  <script>
+    const modal = new bootstrap.Modal(document.getElementById("clienteModal"));
+
+    function abrirModal(cliente = null) {
+      const form = document.getElementById("formCliente");
+      form.reset();
+      form.classList.remove("was-validated");
+      document.getElementById("docFeedback").textContent = "Documento inválido";
+
+      // Cargar datos si hay cliente
+      document.getElementById("IdCliente").value = cliente?.IdCliente || "";
+      document.getElementById("IdTipoDocumento").value =
+        cliente?.IdTipoDocumento || "";
+      document.getElementById("documento").value = cliente?.documento || "";
+      document.getElementById("razonSocial").value = cliente?.razonSocial || "";
+      document.getElementById("direccion").value = cliente?.direccion || "";
+      document.getElementById("telefono").value = cliente?.telefono || "";
+      document.getElementById("correoElectronico").value =
+        cliente?.correoElectronico || "";
+      document.getElementById("modalTitle").textContent = cliente
+        ? "Editar Cliente"
+        : "Nuevo Cliente";
+      modal.show();
+    }
+    document
+      .getElementById("formCliente")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        form.classList.add("was-validated");
+
+        const tipo = form.IdTipoDocumento.value;
+        const doc = form.documento.value.trim();
+        const razon = form.razonSocial.value.trim();
+        const tel = form.telefono.value.trim();
+
+        let valid = true;
+
+        // Validaciones requeridas
+        if (!tipo || !razon || !doc) valid = false;
+
+        // Documento según tipo
+        if (
+          (tipo == 1 && doc.length !== 8) ||
+          (tipo == 2 && doc.length !== 11)
+        ) {
+          form.documento.setCustomValidity("Documento inválido");
+          valid = false;
+        } else {
+          form.documento.setCustomValidity("");
+        }
+
+        // Teléfono: opcional pero si se ingresa debe tener 7 o 9 dígitos
+        if (tel && ![7, 9].includes(tel.length)) {
+          form.telefono.setCustomValidity("Teléfono inválido");
+          valid = false;
+        } else {
+          form.telefono.setCustomValidity("");
+        }
+
+        if (!valid) return;
+
+        const data = Object.fromEntries(new FormData(form));
+        const url = data.IdCliente ? "/cliente/actualizar" : "/cliente/crear";
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok && result.error === "Documento duplicado") {
+          form.documento.setCustomValidity("Documento ya registrado");
+          document.getElementById("docFeedback").textContent =
+            "Documento ya registrado";
+          form.classList.add("was-validated");
+          return;
+        }
+
+        location.reload();
+      });
   </script>
 
   <%- include('partials/footer') %>
