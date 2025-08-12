@@ -165,7 +165,7 @@ const downloadPDFCotizacion = async (req, res) => {
 
     const templatePath = path.join(
       __dirname,
-      "../../layout/Plantilla_Cotizacion_Oficial.docx"
+      "../../docx/Plantilla_Cotizacion_Oficial.docx"
     );
     const content = fs.readFileSync(templatePath, "binary");
     const zip = new PizZip(content);
