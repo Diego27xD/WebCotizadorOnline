@@ -16,7 +16,7 @@ RUN apk update && \
     apk add --no-cache libreoffice openjdk8-jre && \
     rm -rf /var/cache/apk/*
 
-
+RUN npx prisma generate
 EXPOSE 6005
 
 CMD ["npm", "start"]
