@@ -58,12 +58,13 @@ const crearCotizaciones = async (req, res) => {
 
     // Calcular subtotal
     const subtotal = servicios.reduce((acc, s) => {
-      const cantidad = parseInt(s.cantidad) || 0;
-      const monto = parseInt(s.monto) || 0;
+      const cantidad = parseFloat(s.cantidad) || 0;
+      const monto = parseFloat(s.monto) || 0;
       return acc + cantidad * monto;
     }, 0);
 
-    const igv = Math.round(subtotal * 0.18);
+    const igv = parseFloat((subtotal * 0.18).toFixed(2));
+
     const montoTotal = subtotal + igv;
 
     const nuevaCotizacion = await prisma.cotizacion.create({
