@@ -76,7 +76,18 @@
           </select>
           <div class="invalid-feedback">Campo requerido</div>
         </div>
+
         <div class="col-md-3 mb-3" id="validezContainer" style="display: none">
+          <label for="plazoOferta" class="form-label">Plazo</label>
+          <input
+            type="number"
+            class="form-control"
+            id="plazoOferta"
+            name="plazoOferta"
+          />
+          <div class="invalid-feedback">Campo requerido</div>
+        </div>
+        <div class="col-md-3 mb-3">
           <label for="validezOferta" class="form-label"
             >Validez de Oferta (días)</label
           >
@@ -85,16 +96,7 @@
             class="form-control"
             id="validezOferta"
             name="validezOferta"
-          />
-          <div class="invalid-feedback">Campo requerido</div>
-        </div>
-        <div class="col-md-3 mb-3" id="plazoOferta">
-          <label for="plazoOferta" class="form-label">Plazo</label>
-          <input
-            type="number"
-            class="form-control"
-            id="plazoOferta"
-            name="plazoOferta"
+            required
           />
         </div>
       </div>
@@ -366,7 +368,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       const formaPago = document.getElementById("FormaPago");
       const validezContainer = document.getElementById("validezContainer");
-      const validezInput = document.getElementById("validezOferta");
+      const validezInput = document.getElementById("plazoOferta");
 
       formaPago.addEventListener("change", function () {
         if (this.value === "Crédito") {
